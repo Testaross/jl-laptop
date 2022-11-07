@@ -1,4 +1,5 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+
+ESX = exports["ocean_core"]:getSharedObject()
 local onDuty = false
 local apps = {}
 local fullyLoaded = false
@@ -10,7 +11,7 @@ display = false
 -- **  LOCALIZED FUNCTIONS WE USE ONLY IN THIS FILE
 
 -- Globalized shits
-PlayerData = QBCore.Functions.GetPlayerData()
+PlayerData = ESX.GetPlayerData()
 
 local function hadApp(app)
     if not app or not apps then return end
@@ -29,7 +30,7 @@ local function GetPlayerAppPerms()
     if Looping then return end
     Looping = true
     if not PlayerData then return end
-    local playerJob, playerGang = PlayerData.job.name, PlayerData.gang.name
+    local playerJob = PlayerData.job.name
     local tempApps = {}
     for _, app in pairs(Config.Apps) do
         local converted = {
@@ -190,11 +191,13 @@ function isPolice()
 
     return false
 end
-
+RegisterCommand('laptop', function()
+    SetDisplay(true)
+end)
 RegisterNetEvent('jl-laptop:client:openlaptop', function()
-    if haveItem(Config.LaptopDevice) then
+
         SetDisplay(true)
-    end
+
 end)
 
 RegisterNUICallback('close', function(_, cb)
@@ -216,7 +219,7 @@ end)
 AddEventHandler('onResourceStart', function(resource)
     if GetCurrentResourceName() == resource then
         if LocalPlayer.state.isLoggedIn then
-            PlayerData = QBCore.Functions.GetPlayerData()
+            PlayerData = ESX.GetPlayerData()
         end
     end
 end)
@@ -299,21 +302,16 @@ RegisterNUICallback('setting/save', function(data, cb)
 end)
 
 RegisterNUICallback("setting/get", function(_, cb)
-    if PlayerData.metadata['laptop'] then
-        cb({
-            status = true,
-            data = PlayerData.metadata['laptop']
-        })
-    else
+
         cb({
             status = false,
             data = {}
         })
-    end
+
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    PlayerData = QBCore.Functions.GetPlayerData()
+    PlayerData = ESX.GetPlayerData()
 end)
 
 -- Resets state on logout, in case of character change.
@@ -328,10 +326,4 @@ RegisterNetEvent('QBCore:Player:SetPlayerData', function(val)
 end)
 
 -- Everytime a cop goes on or off duty the cop count is updated.
-RegisterNetEvent('police:SetCopCount', function(amount)
-    CurrentCops = amount
-end)
 
-RegisterNetEvent('QBCore:Client:SetDuty', function(duty)
-    onDuty = duty
-end)

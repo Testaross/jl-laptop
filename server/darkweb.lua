@@ -1,4 +1,5 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+
+ESX = exports["ocean_core"]:getSharedObject()
 
 RegisterNetEvent('jl-laptop:server:crateOpened', function(crateID)
     local _s = source

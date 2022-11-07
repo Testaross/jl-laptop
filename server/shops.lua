@@ -1,4 +1,6 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+
+ESX = exports["ocean_core"]:getSharedObject()
+
 local crateCount = 0
 crates = {} -- Table which stores crate netIDs with its contents ( shop items )
 
@@ -22,21 +24,9 @@ local function AddItems(stash, Items)
         }
     end
 
-    MySQL.Async.insert('INSERT INTO stashitems (stash, items) VALUES (:stash, :items) ON DUPLICATE KEY UPDATE items = :items'
-        , {
-        ['stash'] = stash,
-        ['items'] = json.encode(items)
-    })
 end
 
-local function HasStashItems(stashId)
-    local result = MySQL.Sync.fetchScalar('SELECT items FROM stashitems WHERE stash = ?', { stashId })
-    if not result then return end
-    local stashItems = json.decode(result)
-    if not stashItems then return end
 
-    return true, #stashItems
-end
 
 local function GenerateCrateSpawn()
     local count = 0
@@ -99,7 +89,7 @@ QBCore.Functions.CreateCallback('jl-laptop:server:checkout', function(source, cb
     if data.app == 'darkweb' then
         appLabel = 'DarkWeb'
     end
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = ESX.GetPlayer(src)
     local darkwebCrateSpawn = GenerateCrateSpawn()
     if not HasAppAccess(src, data['app']) then return cb("full") end
     local Saved = data['cart']

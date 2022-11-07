@@ -1,4 +1,5 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+
+ESX = exports["ocean_core"]:getSharedObject()
 local Contracts = {}
 local ActivePlates = {} -- Just using this for a quick check to see if a plate is already active on the client side to prevent server spam.
 local PZone = nil
@@ -16,17 +17,9 @@ local currentCops = 0
 ---- Notify functions ----
 
 local function Notify(text, type, time)
-    if Config.Boosting.Notifications == "phone" then
-        TriggerEvent('qb-phone:client:CustomNotification',
-            Lang:t('boosting.info.phonenotify'),
-            text,
-            "fas fa-user-secret",
-            "#00008B",
-            time
-        )
-    else
-        QBCore.Functions.Notify(text, type, time)
-    end
+
+        print(text)
+ 
 end
 
 
@@ -125,42 +118,42 @@ RegisterNetEvent('jl-laptop:client:MissionStarted', function(netID, coords, plat
 end)
 
 RegisterNUICallback('boosting/start', function(data, cb)
-    QBCore.Functions.TriggerCallback('jl-laptop:server:CanStartBoosting', function(result)
+   ESX.TriggerServerCallback('jl-laptop:server:CanStartBoosting', function(result)
         if result == "success" then
             --TriggerServerEvent('jl-laptop:server:StartBoosting', data.id, currentCops)
             cb({
                 status = 'success',
-                message = Lang:t('boosting.laptop.boosting.success')
+                message = 'You started boosting'
             })
         elseif result == "cops" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.boosting.cops')
+                message = 'Not enough cops online'
             })
         elseif result == "running" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.boosting.running')
+                message = 'You are already boosting'
             })
         elseif result == "notfound" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.boosting.notfound')
+                message = 'Contract not found'
             })
         elseif result == "notenough" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.boosting.notenough')
+                message = 'You dont have enough money'
             })
         elseif result == "busy" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.boosting.busy')
+                message = 'You are busy'
             })
         elseif result == "error" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.boosting.error')
+                message = 'Something went wrong'
             })
         end
     end, currentCops, data.id)
@@ -437,7 +430,7 @@ end)
 
 -- Handles state right when the player selects their character and location.
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    QBCore.Functions.TriggerCallback('jl-laptop:server:GetContracts', function(result, plates)
+   ESX.TriggerServerCallback('jl-laptop:server:GetContracts', function(result, plates)
         Contracts = result
         ActivePlates = plates
         if Contracts and #Contracts > 0 then
@@ -477,7 +470,7 @@ RegisterNUICallback('boosting/deny', function(data, cb)
         return
     end
 
-    QBCore.Functions.TriggerCallback('jl-laptop:server:DeclineContract', function(result)
+   ESX.TriggerServerCallback('jl-laptop:server:DeclineContract', function(result)
         if result == "success" then
             cb({
                 status = 'success',
@@ -501,7 +494,7 @@ end)
 RegisterNUICallback('boosting/transfer', function(data, cb)
     local id = data.playerid
     local contract = data.contractID
-    QBCore.Functions.TriggerCallback('jl-laptop:server:TransferContracts', function(result)
+   ESX.TriggerServerCallback('jl-laptop:server:TransferContracts', function(result)
         if result == "success" then
             cb({
                 status = 'success',
@@ -541,33 +534,33 @@ end)
 
 -- Queue Functions --
 RegisterNUICallback('boosting/queue', function(data, cb)
-    QBCore.Functions.TriggerCallback('jl-laptop:server:joinQueue', function(result)
+    ESX.TriggerServerCallback('jl-laptop:server:joinQueue', function(result)
         if result == "success" then
             if data.status then
                 cb({
                     status = 'success',
-                    message = Lang:t('boosting.laptop.queue.success')
+                    message = 'Successfully joined the queue'
                 })
             else
                 cb({
                     status = 'success',
-                    message = Lang:t('boosting.laptop.queue.successquit')
+                    message = 'Successfully left the queue'
                 })
             end
         elseif result == "running" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.queue.running')
+                message = 'There is already a boosting session running'
             })
         elseif result == "inqueue" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.queue.inqueue')
+                message = 'You are already in the queue'
             })
         elseif result == "error" then
             cb({
                 status = 'error',
-                message = Lang:t('boosting.laptop.queue.error')
+                message = 'There was an error, please try again'
             })
         end
     end, data.status)
@@ -587,7 +580,7 @@ end)
 -- Getters for when you open the boost app --
 RegisterNUICallback("boosting/getrep", function(_, cb)
     local data = {
-        rep = PlayerData.metadata['carboostrep'] or 0,
+        rep = 300,
         repconfig = Config.Boosting.TiersPerRep
     }
     cb(data)

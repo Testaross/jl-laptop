@@ -1,4 +1,5 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+
+ESX = exports["ocean_core"]:getSharedObject()
 local crates = {}
 
 local function openCrate(crate)
